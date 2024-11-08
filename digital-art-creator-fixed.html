@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Digital Art Creator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: #0a0a2a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            color: #fff;
+            text-align: center;
+        }
+
+        .controls {
+            padding: 1rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            background: rgba(255, 255, 255, 0.05);
+            justify-content: center;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+
+        label {
+            color: #fff;
+        }
+
+        button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        select, input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.3rem;
+            border-radius: 4px;
+        }
+
+        #canvas {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.5; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .spinning {
+            animation: spin 2s linear infinite;
+        }
+
+        .pulsing {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .rainbow {
+            animation: rainbow 3s linear infinite;
+        }
+
+        @keyframes rainbow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        .mirror {
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Digital Art Creator</h1>
+    </div>
+    
+    <div class="controls">
+        <div class="control-group">
+            <label for="shape">Shape:</label>
+            <select id="shape">
+                <option value="circle">Circle</option>
+                <option value="square">Square</option>
+                <option value="triangle">Triangle</option>
+                <option value="star">Star</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <label for="size">Size:</label>
+            <input type="range" id="size" min="10" max="100" value="30">
+        </div>
+        
+        <div class="control-group">
+            <label for="color">Color:</label>
+            <input type="color" id="color" value="#4a90e2">
+        </div>
+
+        <div class="control-group">
+            <label for="effect">Effect:</label>
+            <select id="effect">
+                <option value="none">None</option>
+                <option value="spinning">Spin</option>
+                <option value="pulsing">Pulse</option>
+                <option value="rainbow">Rainbow</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="mode">Mode:</label>
+            <select id="mode">
+                <option value="normal">Normal</option>
+                <option value="mirror">Mirror</option>
+                <option value="quad">Quad</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <button id="clear">Clear Canvas</button>
+        </div>
+    </div>
+    
+    <div id="canvas"></div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const shapeSelect = document.getElementById('shape');
+        const sizeInput = document.getElementById('size');
+        const colorInput = document.getElementById('color');
+        const effectSelect = document.getElementById('effect');
+        const modeSelect = document.getElementById('mode');
+        const clearBtn = document.getElementById('clear');
+
+        function createShape(x, y, isReflection = false) {
+            const shape = document.createElement('div');
+            const size = sizeInput.value;
+            const color = colorInput.value;
+            const effect = effectSelect.value;
+            
+            shape.className = `shape ${effect} ${isReflection ? 'mirror' : ''}`;
+            shape.style.width = `${size}px`;
+            shape.style.height = `${size}px`;
+            shape.style.backgroundColor = color;
+            shape.style.left = `${x}px`;
+            shape.style.top = `${y}px`;
+            shape.style.transform = 'translate(-50%, -50%)';
+
+            switch(shapeSelect.value) {
+                case 'circle':
+                    shape.style.borderRadius = '50%';
+                    break;
+                case 'square':
+                    shape.style.borderRadius = '0';
+                    break;
+                case 'triangle':
+                    shape.style.width = '0';
+                    shape.style.height = '0';
+                    shape.style.backgroundColor = 'transparent';
+                    shape.style.borderLeft = `${size/2}px solid transparent`;
+                    shape.style.borderRight = `${size/2}px solid transparent`;
+                    shape.style.borderBottom = `${size}px solid ${color}`;
+                    break;
+                case 'star':
+                    shape.style.clipPath = 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
+                    break;
+            }
+            
+            canvas.appendChild(shape);
+            
+            setTimeout(() => {
+                shape.remove();
+            }, 3000);
+        }
+
+        function handleMouseMove(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            switch(modeSelect.value) {
+                case 'normal':
+                    createShape(x, y);
+                    break;
+                case 'mirror':
+                    createShape(x, y);
+                    createShape(canvas.offsetWidth - x, y, true);
+                    break;
+                case 'quad':
+                    createShape(x, y);
+                    createShape(canvas.offsetWidth - x, y, true);
+                    createShape(x, canvas.offsetHeight - y, true);
+                    createShape(canvas.offsetWidth - x, canvas.offsetHeight - y, true);
+                    break;
+            }
+        }
+
+        canvas.addEventListener('mousemove', handleMouseMove);
+        
+        clearBtn.addEventListener('click', () => {
+            canvas.innerHTML = '';
+        });
+    </script>
+</body>
+</html>
